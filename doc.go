@@ -23,12 +23,12 @@ This library provides a custom CLI function to interpret JSON based configuratio
 
 Usage
 
-	$ go get -u bitbucket.org/azaher/config
+	$ go get -u github.com/adzr/config
 
 Then, import the package:
 
   import (
-    "bitbucket.org/azaher/config"
+    "github.com/adzr/config"
   )
 
 Example
