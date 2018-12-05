@@ -78,19 +78,21 @@ func TestCli(t *testing.T) {
 			args: []string{""},
 		}, &output{"", errors.New("json: Unmarshal(non-pointer map[string]interface {})")}},
 		{&input{prefix: "TEST",
-			args: []string{"", "-h"},
-		}, &output{"Usage: . [-c <config>] [-v]\n\n", nil}},
+			conf: conf,
+			args: []string{"", "-usage"},
+		}, &output{"flag provided but not defined: -usage\nUsage:\n  -config string\n    \tJSON string describing the configuration options, JSON values can be placeholders for environment variables that start with 'TEST_' e.g '${DOMAIN}' is replaced with the value of environment variable 'TEST_DOMAIN', example: {}. (default \"{}\")\n  -version\n    \tPrints the version and exits\n", errors.New("flag provided but not defined: -usage")}},
 		{&input{prefix: "TEST",
-			args: []string{"", "--help"},
-		}, &output{"Usage: . [-c <config>] [-v]\n\nOptions:\n    -c, --config=<config>   JSON string describing the configuration options, JSON values can be placeholders for environment variables that start with 'TEST_' e.g '${DOMAIN}' is replaced with the value of environment variable 'TEST_DOMAIN'. (default: null); setable via $TEST_CONFIG\n    -v, --version           Prints the version and exits (e.g. false)\n    -h, --help              usage (-h) / detailed help text (--help)\n\n", nil}},
+			conf: conf,
+			args: []string{"", "-help"},
+		}, &output{"Usage:\n  -config string\n    \tJSON string describing the configuration options, JSON values can be placeholders for environment variables that start with 'TEST_' e.g '${DOMAIN}' is replaced with the value of environment variable 'TEST_DOMAIN', example: {}. (default \"{}\")\n  -version\n    \tPrints the version and exits\n", nil}},
 		{&input{prefix: "TEST",
 			conf: &conf,
-			args: []string{"", "-v"},
+			args: []string{"", "-version"},
 		}, &output{"Release: \nCommit: \nBuild Time: \nBuilt with: \n", nil}},
 		{&input{prefix: "TEST",
 			conf: &conf,
 			info: info,
-			args: []string{"", "-v"},
+			args: []string{"", "-version"},
 		}, &output{fmt.Sprintf("Release: %v\nCommit: %v\nBuild Time: %v\nBuilt with: %v\n",
 			info.ReleaseVersion, info.GitCommit, info.BuildTimestamp, info.GoVersion), nil}},
 		{&input{prefix: "TEST",
@@ -103,7 +105,7 @@ func TestCli(t *testing.T) {
 		i, o := c[0].(*input), c[1].(*output)
 
 		res, err := withMockedArgs(i, func(in *input) (string, error) {
-			return ProcessCommandLine(in.prefix, in.description, in.info, in.conf)
+			return Parse(in.prefix, in.description, in.info, in.conf)
 		})
 
 		if o.result != res || (o.err != err && (o.err == nil || err == nil || o.err.Error() != err.Error())) {
@@ -119,11 +121,11 @@ func TestCliConfig(t *testing.T) {
 	i := &input{
 		prefix: "TEST",
 		conf:   c,
-		args:   []string{"", "-c", "{\"id\":1,\"name\":\"${NAME}\",\"online\":true}"},
+		args:   []string{"", "-config", "{\"id\":1,\"name\":\"${NAME}\",\"online\":true}"},
 	}
 
 	res, err := withMockedArgs(i, func(in *input) (string, error) {
-		return ProcessCommandLine(in.prefix, in.description, in.info, in.conf)
+		return Parse(in.prefix, in.description, in.info, in.conf)
 	})
 
 	if res != "" || err != nil {
