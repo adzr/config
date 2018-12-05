@@ -59,6 +59,8 @@ var (
 	placeHolderRegex = regexp.MustCompile("(?P<PLACEHOLDER>\\$\\{[A-Z][A-Z0-9_]*?[A-Z0-9]\\})")
 )
 
+// EnvWithPrefix returns to functions, the first returns the prefix prepended to the specified string,
+// and the second returns the value of the environment variable named as specified with the prefix.
 func EnvWithPrefix(prefix string) (getEnvKey func(string) string, getEnv func(string, string) string) {
 
 	getEnvKey = func(key string) string {
