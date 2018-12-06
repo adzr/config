@@ -133,7 +133,10 @@ func Parse(envVarPrefix, description string, info *ReleaseInfo, conf interface{}
 
 	// start parsing command line arguments, given the parser rules and command line input.
 	if err = fs.Parse(os.Args[1:]); err == flag.ErrHelp {
-		return output.String(), nil
+		if len(description) == 0 {
+			description = "No description available."
+		}
+		return fmt.Sprintf("%v - %v\n\n%v", os.Args[0], description, output.String()), nil
 	} else if err != nil {
 		return output.String(), err
 	}
